@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/send.php",          "destination": "/api/send" },
+    { "source": "/poll_updates.php",  "destination": "/api/poll_updates" }
+  ]
+}

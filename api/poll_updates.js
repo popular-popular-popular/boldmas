@@ -1,4 +1,4 @@
-const BOT_TOKEN = process.env.BOT_TOKEN || '8562140264:AAGS8bmmOJnoAsXEke4NbrDSCnHNXWb38jo';
+const BOT_TOKEN = process.env.BOT_TOKEN || '8775807272:AAGIA8gNoQy2GQqx_Drwj_KEQF8tnkfr3pY';
 const API_BASE  = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 module.exports = async function handler(req, res) {
